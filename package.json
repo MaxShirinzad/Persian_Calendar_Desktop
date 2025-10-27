@@ -1,14 +1,17 @@
 {
-  "name": "loutos-vue3",
+  "name": "notepad-calendar-app",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "main": "main.js",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+	"start": "electron ."
   },
   "dependencies": {
+	"electron": "^27.0.0",
     "vue": "^3.5.22"
   },
   "devDependencies": {
@@ -16,3 +19,4 @@
     "vite": "^7.1.7"
   }
 }
+
