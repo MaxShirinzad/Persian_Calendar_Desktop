@@ -112,9 +112,23 @@ export const useCalendar = () => {
         applySeasonStyles()
     }
 
-    // انتخاب روز
+    // انتخاب روز و نمایش مودال یادداشت
     const selectDay = (day) => {
         console.log('Selected day:', day)
+
+        // فقط روزهای متعلق به ماه جاری قابل انتخاب باشند
+        if (day[5] === true) return
+
+        selectedDay.value = day
+        noteText.value = ''
+
+        // اگر یادداشتی برای این روز وجود دارد، آن را بارگذاری کن
+        const noteKey = generateNoteKey(day)
+        if (notes.value[noteKey]) {
+            noteText.value = notes.value[noteKey]
+        }
+
+        showNoteModal.value = true
     }
 
     // اعمال استایل‌های فصلی
@@ -129,33 +143,6 @@ export const useCalendar = () => {
             document.head.appendChild(styleElement)
         }
         styleElement.innerHTML = cssSeason
-    }
-
-    // کلاس‌های روز
-    const getDayClasses = (day) => {
-        const classes = ['day-element']
-
-        // منطق معکوس: day[5] === true → روز غیرفعال (ماه قبلی/بعدی)
-        // day[5] === false → روز فعال (ماه جاری)
-        if (day[5] === true) {
-            classes.push('disable-one')
-        } else {
-            classes.push(`date-${activeMonth.value}-${convertDigits(day[0], 'en')}`)
-        }
-
-        // day[3] = true → روز تعطیل است
-        if (day[3] === true) {
-            classes.push('holiday')
-        }
-
-        // علامت‌گذاری روز جاری - فقط اگر متعلق به این ماه باشد
-        if (activeMonth.value === parseInt(todayFa.value.month) &&
-            day[0] === todayFa.value.day &&
-            day[5] === false) { // فقط اگر متعلق به این ماه باشد
-            classes.push('active-season')
-        }
-
-        return classes.join(' ')
     }
 
     // تبدیل ارقام
@@ -197,7 +184,112 @@ export const useCalendar = () => {
         return cssString
     }
 
+    // state جدید برای مدیریت یادداشت‌ها
+    const notes = ref({})
+    const selectedDay = ref(null)
+    const noteText = ref('')
+    const showNoteModal = ref(false)
+
+    // بارگذاری یادداشت‌ها از localStorage هنگام راه‌اندازی
+    onMounted(() => {
+        // ... کدهای موجود ...
+
+        // بارگذاری یادداشت‌ها از localStorage
+        const savedNotes = localStorage.getItem('calendar-notes')
+        if (savedNotes) {
+            notes.value = JSON.parse(savedNotes)
+        }
+    })
+
+
+
+    // تولید کلید یکتا برای هر روز
+    const generateNoteKey = (day) => {
+        return `${activeMonth.value}-${day[0]}-${metaYear.year}`
+    }
+
+    // ذخیره یادداشت
+    const saveNote = () => {
+        if (!selectedDay.value) return
+
+        const noteKey = generateNoteKey(selectedDay.value)
+
+        if (noteText.value.trim()) {
+            notes.value[noteKey] = noteText.value.trim()
+        } else {
+            // اگر یادداشت خالی است، حذف شود
+            delete notes.value[noteKey]
+        }
+
+        // ذخیره در localStorage
+        localStorage.setItem('calendar-notes', JSON.stringify(notes.value))
+
+        showNoteModal.value = false
+        selectedDay.value = null
+        noteText.value = ''
+    }
+
+    // حذف یادداشت
+    const deleteNote = () => {
+        if (!selectedDay.value) return
+
+        const noteKey = generateNoteKey(selectedDay.value)
+        delete notes.value[noteKey]
+
+        // به‌روزرسانی localStorage
+        localStorage.setItem('calendar-notes', JSON.stringify(notes.value))
+
+        showNoteModal.value = false
+        selectedDay.value = null
+        noteText.value = ''
+    }
+
+    // بررسی وجود یادداشت برای یک روز
+    const hasNote = (day) => {
+        if (day[5] === true) return false // روزهای غیرفعال
+
+        const noteKey = generateNoteKey(day)
+        return !!notes.value[noteKey]
+    }
+
+    // دریافت متن یادداشت برای نمایش در tooltip
+    const getNotePreview = (day) => {
+        if (day[5] === true) return ''
+
+        const noteKey = generateNoteKey(day)
+        const note = notes.value[noteKey]
+        return note ? (note.length > 20 ? note.substring(0, 20) + '...' : note) : ''
+    }
+
+    // کلاس‌های روز
+    const getDayClasses = (day) => {
+        const classes = ['day-element']
+
+        // منطق معکوس: day[5] === true → روز غیرفعال (ماه قبلی/بعدی)
+        // day[5] === false → روز فعال (ماه جاری)
+        if (day[5] === true) {
+            classes.push('disable-one')
+        } else {
+            classes.push(`date-${activeMonth.value}-${convertDigits(day[0], 'en')}`)
+        }
+
+        // day[3] = true → روز تعطیل است
+        if (day[3] === true) {
+            classes.push('holiday')
+        }
+
+        // علامت‌گذاری روز جاری - فقط اگر متعلق به این ماه باشد
+        if (activeMonth.value === parseInt(todayFa.value.month) &&
+            day[0] === todayFa.value.day &&
+            day[5] === false) { // فقط اگر متعلق به این ماه باشد
+            classes.push('active-season')
+        }
+
+        return classes.join(' ')
+    }
+
     return {
+        // ... مقادیر موجود ...
         monthLabels,
         weekDays,
         activeMonth,
@@ -209,6 +301,16 @@ export const useCalendar = () => {
         selectDay,
         getDayClasses,
         convertDigits,
-        formatMetaYear
+        formatMetaYear,
+
+        // مقادیر جدید
+        notes,
+        selectedDay,
+        noteText,
+        showNoteModal,
+        saveNote,
+        deleteNote,
+        getNotePreview,
+        hasNote
     }
 }
