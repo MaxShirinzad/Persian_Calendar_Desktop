@@ -390,4 +390,8 @@ export default {
   }
 }
 
+.days {
+  max-width: 840px;
+}
+
 </style>
