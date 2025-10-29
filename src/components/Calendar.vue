@@ -158,35 +158,34 @@ export default {
       console.log('Active month:', activeMonth.value)
     })
 
-    // هفته‌های ماه جاری - کاملاً بازنویسی شده
+    // برای دیباگ - اضافه کردن این کد در computed currentMonthWeeks
     const currentMonthWeeks = computed(() => {
       const monthIndex = activeMonth.value - 1
       console.log('Current month index:', monthIndex)
 
-      // بررسی وجود داده برای این ماه
       if (!calendarObject[monthIndex]) {
         console.warn(`No data for month ${activeMonth.value} (index: ${monthIndex})`)
         return []
       }
 
       const monthData = calendarObject[monthIndex]
-      console.log('Month data length:', monthData.length)
+      console.log('Sample of first 10 days with day[5] values:')
+      monthData.slice(0, 10).forEach((day, index) => {
+        console.log(`Day ${index}:`, day[0], 'day[5] =', day[5], 'events:', day[4])
+      })
 
       const weeks = []
       let currentWeek = []
 
-      // گروه‌بندی روزها در هفته‌های ۷ تایی
       monthData.forEach((day, index) => {
         currentWeek.push(day)
 
-        // وقتی به ۷ روز رسیدیم یا به آخر آرایه رسیدیم
         if (currentWeek.length === 7 || index === monthData.length - 1) {
           weeks.push([...currentWeek])
           currentWeek = []
         }
       })
 
-      console.log('Generated weeks:', weeks)
       return weeks
     })
 
@@ -198,28 +197,24 @@ export default {
       const monthData = calendarObject[monthIndex]
       const events = []
       const currentMonthName = monthLabels[monthIndex]
-      let dateList = []
-      let oneStarted = false
 
-      monthData.forEach(day => {
-        // day[5] مشخص می‌کند آیا روز متعلق به ماه قبل است
-        if (day[5]) {
-          oneStarted = false
-        } else {
-          oneStarted = true
-          dateList.push(day[0])
-        }
+      monthData.forEach((day) => {
+        // بر اساس لاگ‌ها، منطق را معکوس می‌کنیم
+        // اگر day[5] === true باشد، احتمالاً روز متعلق به ماه قبلی/بعدی است
+        // اگر day[5] === false باشد، روز متعلق به ماه جاری است
+        const isDayInCurrentMonth = day[5] === false
 
-        // اگر روز متعلق به این ماه است و رویداد دارد
-        if (oneStarted && day[4] && day[4].length > 0) {
-          const startedDate = dateList[dateList.length - 1]
+        console.log(`Day ${day[0]}: day[5] = ${day[5]}, in current month: ${isDayInCurrentMonth}`) // دیباگ
+
+        // فقط روزهایی که متعلق به این ماه هستند و رویداد دارند
+        if (isDayInCurrentMonth && day[4] && day[4].length > 0) {
           day[4].forEach(dayElement => {
             const indexBracket = dayElement.indexOf("[")
             const eventdate = (0 <= indexBracket) ? dayElement.substring(indexBracket) : ""
             const eventTitle = dayElement.replace(eventdate, "")
 
             events.push({
-              day: `${startedDate} ${currentMonthName}`,
+              day: `${day[0]} ${currentMonthName}`,
               eventTitle: eventTitle,
               date: eventdate,
             })
@@ -227,7 +222,6 @@ export default {
         }
       })
 
-      console.log('Current month events:', events)
       return events
     })
 
@@ -263,21 +257,23 @@ export default {
     const getDayClasses = (day) => {
       const classes = ['day-element']
 
-      // day[5] = false یعنی روز متعلق به ماه قبل/بعد است
-      if (day[5] === false) {
+      // منطق معکوس: day[5] === true → روز غیرفعال (ماه قبلی/بعدی)
+      // day[5] === false → روز فعال (ماه جاری)
+      if (day[5] === true) {
         classes.push('disable-one')
       } else {
         classes.push(`date-${activeMonth.value}-${convertDigits(day[0], 'en')}`)
       }
 
-      // day[3] = true یعنی روز تعطیل است
+      // day[3] = true → روز تعطیل است
       if (day[3] === true) {
         classes.push('holiday')
       }
 
-      // علامت‌گذاری روز جاری
+      // علامت‌گذاری روز جاری - فقط اگر متعلق به این ماه باشد
       if (activeMonth.value === parseInt(todayFa.value.month) &&
-          day[0] === todayFa.value.day) {
+          day[0] === todayFa.value.day &&
+          day[5] === false) { // فقط اگر متعلق به این ماه باشد
         classes.push('active-season')
       }
 
