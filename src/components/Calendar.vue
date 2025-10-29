@@ -32,6 +32,7 @@
           </template>
         </div>
 
+        <div class="months-container">
         <div class="months">
           <span
               v-for="(month, index) in monthLabels"
@@ -48,7 +49,9 @@
             {{ month }}
           </span>
         </div>
-        <hr class="month-line" />
+        </div>
+
+        <hr class="month-line"/>
 
         <div class="days">
           <ul class="weeks">
@@ -117,9 +120,9 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
-import { calendarObject, metaYear, cssProperties } from '../utils/calendarData'
-import { dateUtils } from '../utils/dateUtils'
+import {ref, computed, onMounted, watch} from 'vue'
+import {calendarObject, metaYear, cssProperties} from '../utils/calendarData'
+import {dateUtils} from '../utils/dateUtils'
 
 export default {
   name: 'Calendar',
@@ -146,11 +149,11 @@ export default {
     onMounted(() => {
       const today = Date.now()
       todayFa.value = {
-        day: dateUtils.getDateFormat(today, { day: "2-digit" }),
-        month: dateUtils.getDateFormat(today, { month: "numeric" }),
-        monthTitle: dateUtils.getDateFormat(today, { month: "long" }),
-        year: dateUtils.getDateFormat(today, { year: "numeric" }),
-        dayWeek: dateUtils.getDateFormat(today, { weekday: "long" }),
+        day: dateUtils.getDateFormat(today, {day: "2-digit"}),
+        month: dateUtils.getDateFormat(today, {month: "numeric"}),
+        monthTitle: dateUtils.getDateFormat(today, {month: "long"}),
+        year: dateUtils.getDateFormat(today, {year: "numeric"}),
+        dayWeek: dateUtils.getDateFormat(today, {weekday: "long"}),
       }
       activeMonth.value = parseInt(todayFa.value.month)
       applySeasonStyles()
@@ -338,5 +341,53 @@ export default {
 </script>
 
 <style scoped>
+
+.months-container {
+  padding: 2px 0;
+}
+
+.months {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  direction: rtl;
+  max-width: 550px;
+}
+
+.month-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  min-width: 80px;
+  text-align: center;
+}
+
+.month-item:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.active-season-cr {
+  background-color: #5e991a !important;
+  color: white !important;
+  border-color: #5e991a !important;
+}
+
+/* برای صفحه‌های کوچک */
+@media (max-width: 768px) {
+  .months {
+    gap: 8px;
+  }
+
+  .month-item {
+    padding: 6px 12px;
+    min-width: 70px;
+    font-size: 14px;
+  }
+}
 
 </style>
