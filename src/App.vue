@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <h1>🗓️ دفترچه یادداشت و تقویم</h1>
-    <Notepad />
+  <div id="app">
     <Calendar />
   </div>
 </template>
 
-<script setup>
-import Notepad from './components/Notepad.vue';
-import Calendar from './components/Calendar.vue';
+<script>
+import Calendar from './components/Calendar.vue'
+
+export default {
+  name: 'App',
+  components: {
+    Calendar
+  }
+}
 </script>
