@@ -113,7 +113,7 @@ export const useCalendar = () => {
 
     // انتخاب روز و نمایش مودال یادداشت
     const selectDay = (day) => {
-        // console.log('Selected day:', day)
+        console.log('Selected day:', day)
 
         // فقط روزهای متعلق به ماه جاری قابل انتخاب باشند
         if (day[5] === true) return
@@ -128,6 +128,9 @@ export const useCalendar = () => {
         }
 
         showNoteModal.value = true
+
+        // دیباگ برای مناسبت‌ها
+        console.log('Day events:', getDayEvents(day))
     }
 
     // اعمال استایل‌های فصلی
@@ -287,6 +290,41 @@ export const useCalendar = () => {
         return classes.join(' ')
     }
 
+    // دریافت مناسبت‌های روز
+    const getDayEvents = (day) => {
+        if (!day || day[5] === true) return []
+
+        const events = []
+        if (day[4] && day[4].length > 0) {
+            day[4].forEach(dayElement => {
+                const indexBracket = dayElement.indexOf("[")
+                const eventdate = (0 <= indexBracket) ? dayElement.substring(indexBracket) : ""
+                const eventTitle = dayElement.replace(eventdate, "").trim()
+
+                if (eventTitle) {
+                    events.push({
+                        title: eventTitle,
+                        date: eventdate
+                    })
+                }
+            })
+        }
+        return events
+    }
+
+    // computed برای مناسبت‌های روز انتخاب شده
+    const selectedDayEvents = computed(() => {
+        if (!selectedDay.value) return []
+        return getDayEvents(selectedDay.value)
+    })
+
+    // تابع formatEventDate برای فرمت‌دهی بهتر تاریخ مناسبت‌ها
+    const formatEventDate = (eventDate) => {
+        if (!eventDate) return ''
+        // حذف براکت‌ها و تمیز کردن متن
+        return eventDate.replace(/[\[\]]/g, '').trim()
+    }
+
     return {
         monthLabels,
         weekDays,
@@ -307,6 +345,9 @@ export const useCalendar = () => {
         saveNote,
         deleteNote,
         getNotePreview,
-        hasNote
+        hasNote,
+        selectedDayEvents,
+        formatEventDate,
+        getDayEvents
     }
 }

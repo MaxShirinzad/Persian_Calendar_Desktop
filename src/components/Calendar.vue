@@ -122,6 +122,8 @@
     <div class="clearfix"></div>
 
 
+
+
     <!-- مودال یادداشت -->
     <div v-if="showNoteModal" class="note-modal-overlay" @click="showNoteModal = false">
       <div class="note-modal" @click.stop>
@@ -129,6 +131,26 @@
           <h3>یادداشت برای روز {{ convertDigits(selectedDay[0], 'fa') }} {{ monthLabels[activeMonth - 1] }}</h3>
           <button class="close-btn" @click="showNoteModal = false">×</button>
         </div>
+        
+        <!-- بخش مناسبت‌های روز -->
+        <div v-if="selectedDayEvents.length > 0" class="note-modal-body">
+<!--                    <h4 class="events-title">مناسبت‌های این روز:</h4>-->
+          <div class="">
+            <div
+                v-for="(event, index) in selectedDayEvents"
+                :key="index"
+                class="event-item"
+            >
+              <span class="event-icon">📌</span>
+              <span class="event-text">{{ event.title }}</span>
+              <span v-if="event.date" class="event-date">
+                {{ formatEventDate(event.date) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <br>
 
         <div class="note-modal-body">
           <textarea
