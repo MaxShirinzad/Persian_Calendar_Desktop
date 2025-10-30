@@ -1,6 +1,9 @@
 import {ref, computed, onMounted, watch} from 'vue'
 import {calendarObject, metaYear, cssProperties} from '../utils/calendarData'
 import {dateUtils} from '../utils/dateUtils'
+import moment from 'moment'
+import 'jalali-moment'
+import PersianDate from 'persian-date'
 
 export const useCalendar = () => {
 
@@ -390,7 +393,7 @@ export const useCalendar = () => {
         }
     }
 
-    // توابع تبدیل تاریخ - تصحیح شده
+    // توابع تبدیل تاریخ
     const convertJalaliToGregorian = (jalaliDate) => {
         try {
             const cleanedDate = jalaliDate.replace(/[/]/g, '-')
@@ -404,40 +407,25 @@ export const useCalendar = () => {
             const month = parseInt(parts[1])
             const day = parseInt(parts[2])
 
-            // استفاده از dateUtils برای تبدیل - روش سازگار
-            // فرض می‌کنیم dateUtils از استاندارد خاصی پیروی می‌کند
-            let gregorianDate
+            // استفاده از PersianDate
+            const persianDate = new PersianDate([year, month - 1, day]) // ماه در PersianDate از 0 شروع می‌شود
+            const gregorianDate = persianDate.toCalendar('gregorian')
 
-            // روش 1: اگر تابع مستقیم وجود دارد
-            if (dateUtils.jalaliToGregorian) {
-                gregorianDate = dateUtils.jalaliToGregorian(year, month, day)
-            }
-            // روش 2: استفاده از timestamp اگر موجود باشد
-            else if (dateUtils.jalaliToGregorianTimestamp) {
-                const timestamp = dateUtils.jalaliToGregorianTimestamp(year, month, day)
-                gregorianDate = new Date(timestamp)
-            }
-            // روش 3: تبدیل تقریبی
-            else {
-                // تبدیل تقریبی (این فقط برای نمایش است و دقیق نیست)
-                const approxDate = new Date(year + 621, month - 1, day)
-                gregorianDate = approxDate
-            }
+            // فرمت‌دهی به فارسی
+            const persianMonths = [
+                'ژانویه', 'فوریه', 'مارس', 'آوریل', 'مه', 'ژوئن',
+                'ژوئیه', 'اوت', 'سپتامبر', 'اکتبر', 'نوامبر', 'دسامبر'
+            ]
 
-            const formattedDate = gregorianDate.toLocaleDateString('fa-IR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                calendar: 'gregory'
-            })
+            const englishMonths = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ]
 
-            const englishDate = gregorianDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            })
+            const persianFormatted = `${convertDigits(gregorianDate.date().toString(), 'fa')} ${persianMonths[gregorianDate.month()]} ${convertDigits(gregorianDate.year().toString(), 'fa')}`
+            const englishFormatted = `${englishMonths[gregorianDate.month()]} ${gregorianDate.date()}, ${gregorianDate.year()}`
 
-            return `${formattedDate} - ${englishDate}`
+            return `${persianFormatted} - ${englishFormatted}`
 
         } catch (error) {
             console.error('Conversion error:', error)
@@ -454,32 +442,17 @@ export const useCalendar = () => {
                 throw new Error('فرمت تاریخ نامعتبر')
             }
 
-            let jalaliDate
-
-            // روش 1: اگر تابع مستقیم وجود دارد
-            if (dateUtils.gregorianToJalali) {
-                jalaliDate = dateUtils.gregorianToJalali(
-                    dateObj.getFullYear(),
-                    dateObj.getMonth() + 1,
-                    dateObj.getDate()
-                )
-            }
-            // روش 2: استفاده از getDateFormat
-            else {
-                const jalaliDay = dateUtils.getDateFormat(dateObj, {day: "numeric", calendar: 'jalali'})
-                const jalaliMonth = dateUtils.getDateFormat(dateObj, {month: "numeric", calendar: 'jalali'})
-                const jalaliYear = dateUtils.getDateFormat(dateObj, {year: "numeric", calendar: 'jalali'})
-                jalaliDate = [jalaliYear, jalaliMonth, jalaliDay]
-            }
+            // استفاده از PersianDate
+            const persianDate = new PersianDate(dateObj)
 
             const monthNames = [
                 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
                 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
             ]
 
-            const jalaliMonthName = monthNames[parseInt(jalaliDate[1]) - 1] || jalaliDate[1]
-            const formattedDate = `${jalaliDate[2]} ${jalaliMonthName} ${jalaliDate[0]}`
-            const numericDate = `${jalaliDate[0]}/${jalaliDate[1].toString().padStart(2, '0')}/${jalaliDate[2].toString().padStart(2, '0')}`
+            const jalaliMonthName = monthNames[persianDate.month()]
+            const formattedDate = `${convertDigits(persianDate.date().toString(), 'fa')} ${jalaliMonthName} ${convertDigits(persianDate.year().toString(), 'fa')}`
+            const numericDate = `${convertDigits(persianDate.year().toString(), 'fa')}/${convertDigits((persianDate.month() + 1).toString().padStart(2, '0'), 'fa')}/${convertDigits(persianDate.date().toString().padStart(2, '0'), 'fa')}`
 
             return `${formattedDate} - ${numericDate}`
 
