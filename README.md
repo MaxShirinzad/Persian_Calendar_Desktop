@@ -1,5 +1,36 @@
-# Vue 3 + Vite
+# معرفی
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+![GitHub](https://github.com/MaxShirinzad/Persian_Calendar_Desktop/assets/Persian Calendar 3.png)
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+
+<p align="center">
+    <img src="/assets/socialcard.jpg" width="700" alt="loutos">
+</p>
+
+تقویم فارسی یک دستیار رومیزی فارسی که برای سیستم عامل های ویندوز ، مک و لینوکس طراحی شده که شامل ابزار های مختلف مثل تقویم ،  تبدیل تاریخ ، دفترچه
+یادداشت و ...
+
+## اسکرین شات ها
+
+<p align="center">
+    <img src="assets/Persian Calendar 3.png" alt="Persian Calendar screenshot 1" width="600">
+</p>
+<p align="center">
+    <img src="assets/Persian Calendar 2 - Note 2.png" alt="Persian Calendar screenshot 2" width="600">
+</p>
+
+## نحوه Build
+
+``` bash
+# install dependencies
+npm install
+
+# serve with hot reload at localhost:5173
+npm run dev
+
+# build electron application for production
+npm run build
+
+# start app with npm after build
+npm start
+`
