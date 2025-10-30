@@ -208,7 +208,6 @@
                   type="radio"
                   value="jalaliToGregorian"
                   v-model="convertDirection"
-                  @change="switchConversionDirection"
               />
               شمسی به میلادی
             </label>
@@ -217,7 +216,6 @@
                   type="radio"
                   value="gregorianToJalali"
                   v-model="convertDirection"
-                  @change="switchConversionDirection"
               />
               میلادی به شمسی
             </label>

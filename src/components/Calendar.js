@@ -334,46 +334,6 @@ export const useCalendar = () => {
     const convertedDate = ref('')
     const convertDirection = ref('jalaliToGregorian') // جهت تبدیل
 
-    // تابع برای فرمت‌دهی تاریخ امروز به صورت خودکار
-    const getTodayDate = (direction) => {
-        const today = new Date()
-
-        if (direction === 'jalaliToGregorian') {
-            // تاریخ امروز شمسی - استفاده از متدهای موجود dateUtils
-            try {
-                // روش 1: استفاده از getDateFormat اگر موجود باشد
-                const jalaliDateString = dateUtils.getDateFormat(today, {calendar: 'jalali'})
-                if (jalaliDateString) {
-                    // استخراج سال، ماه و روز از رشته تاریخ
-                    const parts = jalaliDateString.split('/')
-                    if (parts.length === 3) {
-                        return `${parts[0]}-${parts[1]}-${parts[2]}`
-                    }
-                }
-
-                // روش 2: استفاده از تبدیل دستی اگر متد مستقیم وجود ندارد
-                const todayFa = {
-                    day: dateUtils.getDateFormat(today, {day: "2-digit", calendar: 'jalali'}),
-                    month: dateUtils.getDateFormat(today, {month: "numeric", calendar: 'jalali'}),
-                    year: dateUtils.getDateFormat(today, {year: "numeric", calendar: 'jalali'})
-                }
-
-                return `${todayFa.year}-${todayFa.month.padStart(2, '0')}-${todayFa.day.padStart(2, '0')}`
-
-            } catch (error) {
-                console.error('Error converting to Jalali:', error)
-                // روش 3: استفاده از تاریخ تقریبی اگر خطا داشت
-                const currentYear = 1403 // سال تقریبی - باید منطبق با داده‌های تقویم باشد
-                const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0')
-                const currentDay = today.getDate().toString().padStart(2, '0')
-                return `${currentYear}-${currentMonth}-${currentDay}`
-            }
-        } else {
-            // تاریخ امروز میلادی
-            return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
-        }
-    }
-
     // تابع برای نمایش تاریخ امروز در مودال
     const getTodayDisplay = () => {
         const today = new Date()
@@ -517,19 +477,43 @@ export const useCalendar = () => {
         convertedDate.value = ''
     }
 
-    const switchConversionDirection = () => {
-        convertDirection.value = convertDirection.value === 'jalaliToGregorian'
-            ? 'gregorianToJalali'
-            : 'jalaliToGregorian'
+    watch(convertDirection, (newDirection, oldDirection) => {
+        if (newDirection !== oldDirection) {
+            // پاک کردن نتیجه قبلی
+            convertedDate.value = ''
 
-        // هنگام تغییر جهت، تاریخ امروز را به عنوان پیش‌فرض قرار بده
-        convertDateInput.value = getTodayDate(convertDirection.value)
-        convertedDate.value = ''
+            // تنظیم تاریخ امروز برای جهت جدید
+            convertDateInput.value = getTodayDate(newDirection)
 
-        // تبدیل خودکار پس از تغییر جهت
-        setTimeout(() => {
-            convertDate()
-        }, 100)
+            // انجام خودکار تبدیل پس از تغییر جهت
+            setTimeout(() => {
+                convertDate()
+            }, 100)
+        }
+    })
+
+    // تابع برای فرمت‌دهی تاریخ امروز به صورت خودکار
+    const getTodayDate = (direction) => {
+        const today = new Date()
+
+        if (direction === 'jalaliToGregorian') {
+            // تاریخ امروز شمسی
+            try {
+                if (dateUtils && dateUtils.getDateFormat) {
+                    const jalaliDay = dateUtils.getDateFormat(today, {day: "numeric", calendar: 'jalali'})
+                    const jalaliMonth = dateUtils.getDateFormat(today, {month: "numeric", calendar: 'jalali'})
+                    const jalaliYear = dateUtils.getDateFormat(today, {year: "numeric", calendar: 'jalali'})
+                    return `${jalaliYear}-${jalaliMonth.padStart(2, '0')}-${jalaliDay.padStart(2, '0')}`
+                }
+            } catch (error) {
+                console.error('Error getting today date:', error)
+            }
+            // مقدار پیش‌فرض اگر خطا داشت
+            return '1404-01-01'
+        } else {
+            // تاریخ امروز میلادی
+            return `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`
+        }
     }
 
     // placeholder داینامیک برای input
@@ -586,7 +570,6 @@ export const useCalendar = () => {
         openConvertModal,
         closeConvertModal,
         convertDate,
-        switchConversionDirection,
         getInputPlaceholder,
         getConvertModalTitle,
         getConvertButtonText,
