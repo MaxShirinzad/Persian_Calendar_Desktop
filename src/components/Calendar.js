@@ -32,24 +32,23 @@ export const useCalendar = () => {
         }
         activeMonth.value = parseInt(todayFa.value.month)
         applySeasonStyles()
-        console.log('Today:', todayFa.value)
-        console.log('Active month:', activeMonth.value)
+        // console.log('Today:', todayFa.value)
+        // console.log('Active month:', activeMonth.value)
     })
 
-    // برای دیباگ - اضافه کردن این کد در computed currentMonthWeeks
     const currentMonthWeeks = computed(() => {
         const monthIndex = activeMonth.value - 1
-        console.log('Current month index:', monthIndex)
+        // console.log('Current month index:', monthIndex)
 
         if (!calendarObject[monthIndex]) {
-            console.warn(`No data for month ${activeMonth.value} (index: ${monthIndex})`)
+            // console.warn(`No data for month ${activeMonth.value} (index: ${monthIndex})`)
             return []
         }
 
         const monthData = calendarObject[monthIndex]
-        console.log('Sample of first 10 days with day[5] values:')
+        // console.log('Sample of first 10 days with day[5] values:')
         monthData.slice(0, 10).forEach((day, index) => {
-            console.log(`Day ${index}:`, day[0], 'day[5] =', day[5], 'events:', day[4])
+            // console.log(`Day ${index}:`, day[0], 'day[5] =', day[5], 'events:', day[4])
         })
 
         const weeks = []
@@ -82,7 +81,7 @@ export const useCalendar = () => {
             // اگر day[5] === false باشد، روز متعلق به ماه جاری است
             const isDayInCurrentMonth = day[5] === false
 
-            console.log(`Day ${day[0]}: day[5] = ${day[5]}, in current month: ${isDayInCurrentMonth}`) // دیباگ
+            // console.log(`Day ${day[0]}: day[5] = ${day[5]}, in current month: ${isDayInCurrentMonth}`)
 
             // فقط روزهایی که متعلق به این ماه هستند و رویداد دارند
             if (isDayInCurrentMonth && day[4] && day[4].length > 0) {
@@ -105,7 +104,7 @@ export const useCalendar = () => {
 
     // تغییر ماه
     const changeMonth = (monthNum) => {
-        console.log('Changing to month:', monthNum)
+        // console.log('Changing to month:', monthNum)
         if (activeMonth.value === monthNum) return
 
         activeMonth.value = monthNum
@@ -114,7 +113,7 @@ export const useCalendar = () => {
 
     // انتخاب روز و نمایش مودال یادداشت
     const selectDay = (day) => {
-        console.log('Selected day:', day)
+        // console.log('Selected day:', day)
 
         // فقط روزهای متعلق به ماه جاری قابل انتخاب باشند
         if (day[5] === true) return
@@ -289,7 +288,6 @@ export const useCalendar = () => {
     }
 
     return {
-        // ... مقادیر موجود ...
         monthLabels,
         weekDays,
         activeMonth,
@@ -302,8 +300,6 @@ export const useCalendar = () => {
         getDayClasses,
         convertDigits,
         formatMetaYear,
-
-        // مقادیر جدید
         notes,
         selectedDay,
         noteText,
