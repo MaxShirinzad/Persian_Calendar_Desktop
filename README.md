@@ -1,6 +1,6 @@
 # معرفی
 
-![GitHub](https://github.com/MaxShirinzad/Persian_Calendar_Desktop/assets/Persian Calendar 3.png)
+![GitHub](assets/Persian Calendar 3.png)
 
 
 <p align="center">
