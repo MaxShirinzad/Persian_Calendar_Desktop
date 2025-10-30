@@ -1,8 +1,13 @@
 <template>
   <div class="container">
-    <h1>
-      تقویم فارسی
-    </h1>
+
+    <div class="header-actions">
+      <h1>تقویم فارسی</h1>
+
+      <button @click="openConvertModal" class="convert-date-btn">
+        🔄 تبدیل تاریخ
+      </button>
+    </div>
 
     <div class="calendar-wrapper">
       <div class="calendar-base">
@@ -131,7 +136,7 @@
           <h3>یادداشت برای روز {{ convertDigits(selectedDay[0], 'fa') }} {{ monthLabels[activeMonth - 1] }}</h3>
           <button class="close-btn" @click="showNoteModal = false">×</button>
         </div>
-        
+
         <!-- بخش مناسبت‌های روز -->
         <div v-if="selectedDayEvents.length > 0" class="note-modal-body">
 <!--                    <h4 class="events-title">مناسبت‌های این روز:</h4>-->
@@ -174,6 +179,94 @@
           </button>
           <button @click="showNoteModal = false" class="btn btn-secondary">
             انصراف
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- مودال برای تبدیل تاریخ -->
+    <div v-if="showConvertModal" class="modal-overlay" @click="closeConvertModal">
+      <div class="modal convert-modal" @click.stop>
+        <div class="modal-header">
+          <h3>{{ getConvertModalTitle }}</h3>
+          <button class="close-btn" @click="closeConvertModal">×</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- انتخاب جهت تبدیل -->
+          <div class="conversion-direction">
+            <label class="direction-label">
+              <input
+                  type="radio"
+                  value="jalaliToGregorian"
+                  v-model="convertDirection"
+                  @change="switchConversionDirection"
+              />
+              شمسی به میلادی
+            </label>
+            <label class="direction-label">
+              <input
+                  type="radio"
+                  value="gregorianToJalali"
+                  v-model="convertDirection"
+                  @change="switchConversionDirection"
+              />
+              میلادی به شمسی
+            </label>
+          </div>
+
+          <!-- ورودی تاریخ -->
+          <div class="input-group">
+            <label class="input-label">
+              {{ convertDirection === 'jalaliToGregorian' ? 'تاریخ شمسی' : 'تاریخ میلادی' }}
+            </label>
+            <input
+                v-model="convertDateInput"
+                :placeholder="getInputPlaceholder"
+                class="date-input"
+                @keyup.enter="convertDate"
+            />
+            <small class="input-hint">
+              {{ convertDirection === 'jalaliToGregorian'
+                ? 'فرمت: سال-ماه-روز (۱۴۰۳-۰۱-۱۵)'
+                : 'فرمت: سال-ماه-روز (۲۰۲۴-۰۴-۰۵)' }}
+            </small>
+          </div>
+
+          <!-- دکمه تبدیل -->
+          <button @click="convertDate" class="convert-btn">
+            تبدیل تاریخ
+          </button>
+
+          <!-- نتیجه تبدیل -->
+          <div v-if="convertedDate" class="result-section">
+            <h4 class="result-title">نتیجه تبدیل:</h4>
+            <div class="converted-date">
+              {{ convertedDate }}
+            </div>
+          </div>
+
+          <!-- راهنما -->
+          <div class="help-section">
+            <h4 class="help-title">راهنما:</h4>
+            <ul class="help-list">
+              <li v-if="convertDirection === 'jalaliToGregorian'">
+                • تاریخ شمسی را به فرمت <strong>سال-ماه-روز</strong> وارد کنید
+              </li>
+              <li v-else>
+                • تاریخ میلادی را به فرمت <strong>سال-ماه-روز</strong> وارد کنید
+              </li>
+              <li>• از جداکننده‌های - یا / می‌توانید استفاده کنید</li>
+              <li>• برای تبدیل سریع از کلید Enter استفاده کنید</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button @click="closeConvertModal" class="btn btn-secondary">
+            بستن
           </button>
         </div>
       </div>

@@ -325,6 +325,114 @@ export const useCalendar = () => {
         return eventDate.replace(/[\[\]]/g, '').trim()
     }
 
+    // state برای مودال تبدیل تاریخ
+    const showConvertModal = ref(false)
+    const convertDateInput = ref('')
+    const convertedDate = ref('')
+    const convertDirection = ref('jalaliToGregorian') // جهت تبدیل
+
+    // توابع برای تبدیل تاریخ
+    const openConvertModal = () => {
+        showConvertModal.value = true
+        convertDateInput.value = ''
+        convertedDate.value = ''
+    }
+
+    const closeConvertModal = () => {
+        showConvertModal.value = false
+        convertDateInput.value = ''
+        convertedDate.value = ''
+    }
+
+    const convertDate = () => {
+        if (!convertDateInput.value.trim()) {
+            convertedDate.value = 'لطفاً تاریخ را وارد کنید'
+            return
+        }
+
+        try {
+            if (convertDirection.value === 'jalaliToGregorian') {
+                // تبدیل تاریخ شمسی به میلادی
+                const jalaliDate = convertDateInput.value.trim()
+                const gregorianDate = convertJalaliToGregorian(jalaliDate)
+                convertedDate.value = gregorianDate
+            } else {
+                // تبدیل تاریخ میلادی به شمسی
+                const gregorianDate = convertDateInput.value.trim()
+                const jalaliDate = convertGregorianToJalali(gregorianDate)
+                convertedDate.value = jalaliDate
+            }
+        } catch (error) {
+            convertedDate.value = 'خطا در تبدیل تاریخ. فرمت را بررسی کنید.'
+            console.error('Date conversion error:', error)
+        }
+    }
+
+    const convertJalaliToGregorian = (jalaliDate) => {
+        // فرمت مورد انتظار: 1403-01-15 یا 1403/01/15
+        const cleanedDate = jalaliDate.replace(/[/]/g, '-')
+        const parts = cleanedDate.split('-')
+
+        if (parts.length !== 3) {
+            throw new Error('فرمت تاریخ نامعتبر')
+        }
+
+        const year = parseInt(parts[0])
+        const month = parseInt(parts[1])
+        const day = parseInt(parts[2])
+
+        // استفاده از dateUtils برای تبدیل
+        const timestamp = dateUtils.jalaliToGregorianTimestamp(year, month, day)
+        const gregorianDate = new Date(timestamp)
+
+        return gregorianDate.toLocaleDateString('fa-IR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })
+    }
+
+    const convertGregorianToJalali = (gregorianDate) => {
+        // فرمت مورد انتظار: 2024-04-05 یا 2024/04/05
+        const cleanedDate = gregorianDate.replace(/[/]/g, '-')
+        const dateObj = new Date(cleanedDate)
+
+        if (isNaN(dateObj.getTime())) {
+            throw new Error('فرمت تاریخ نامعتبر')
+        }
+
+        // استفاده از dateUtils برای تبدیل
+        const jalaliDate = dateUtils.gregorianToJalali(
+            dateObj.getFullYear(),
+            dateObj.getMonth() + 1,
+            dateObj.getDate()
+        )
+
+        return `${jalaliDate[0]}/${jalaliDate[1]}/${jalaliDate[2]} - ${jalaliDate[0]}/${jalaliDate[1]}/${jalaliDate[2]} شمسی`
+    }
+
+    const switchConversionDirection = () => {
+        convertDirection.value = convertDirection.value === 'jalaliToGregorian'
+            ? 'gregorianToJalali'
+            : 'jalaliToGregorian'
+        convertDateInput.value = ''
+        convertedDate.value = ''
+    }
+
+    // placeholder داینامیک برای input
+    const getInputPlaceholder = computed(() => {
+        return convertDirection.value === 'jalaliToGregorian'
+            ? 'مثال: 1403-01-15'
+            : 'مثال: 2024-04-05'
+    })
+
+    // عنوان داینامیک برای مودال
+    const getConvertModalTitle = computed(() => {
+        return convertDirection.value === 'jalaliToGregorian'
+            ? 'تبدیل تاریخ شمسی به میلادی'
+            : 'تبدیل تاریخ میلادی به شمسی'
+    })
+
     return {
         monthLabels,
         weekDays,
@@ -348,6 +456,16 @@ export const useCalendar = () => {
         hasNote,
         selectedDayEvents,
         formatEventDate,
-        getDayEvents
+        getDayEvents,
+        showConvertModal,
+        convertDateInput,
+        convertedDate,
+        convertDirection,
+        openConvertModal,
+        closeConvertModal,
+        convertDate,
+        switchConversionDirection,
+        getInputPlaceholder,
+        getConvertModalTitle
     }
 }
