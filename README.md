@@ -1,10 +1,7 @@
 # معرفی
 
-![GitHub](assets/Persian Calendar 3.png)
-
-
 <p align="center">
-    <img src="/assets/socialcard.jpg" width="700" alt="loutos">
+    <img src="assets/Persian Calendar 3.png" width="700" alt="loutos">
 </p>
 
 تقویم فارسی یک دستیار رومیزی فارسی که برای سیستم عامل های ویندوز ، مک و لینوکس طراحی شده که شامل ابزار های مختلف مثل تقویم ،  تبدیل تاریخ ، دفترچه
