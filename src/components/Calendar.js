@@ -394,73 +394,78 @@ export const useCalendar = () => {
     }
 
     // توابع تبدیل تاریخ
-    const convertJalaliToGregorian = (jalaliDate) => {
-        try {
-            const cleanedDate = jalaliDate.replace(/[/]/g, '-')
-            const parts = cleanedDate.split('-')
+        const convertJalaliToGregorian = (jalaliDate) => {
+            try {
+                const cleanedDate = jalaliDate.replace(/[/]/g, '-')
+                const parts = cleanedDate.split('-')
 
-            if (parts.length !== 3) {
-                throw new Error('فرمت تاریخ نامعتبر')
+                if (parts.length !== 3) {
+                    throw new Error('فرمت تاریخ نامعتبر')
+                }
+
+                const year = parseInt(parts[0])
+                const month = parseInt(parts[1])
+                const day = parseInt(parts[2])
+
+                // استفاده صحیح از PersianDate
+                const persianDate = new PersianDate()
+                persianDate.year(year)
+                persianDate.month(month - 1) // ماه در PersianDate از 0 شروع می‌شود
+                persianDate.date(day)
+
+                // تبدیل به تاریخ میلادی
+                const gregorianDate = new Date(persianDate.valueOf())
+
+                // فرمت‌دهی به فارسی
+                const persianMonths = [
+                    'ژانویه', 'فوریه', 'مارس', 'آوریل', 'مه', 'ژوئن',
+                    'ژوئیه', 'اوت', 'سپتامبر', 'اکتبر', 'نوامبر', 'دسامبر'
+                ]
+
+                const englishMonths = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ]
+
+                const persianFormatted = `${convertDigits(gregorianDate.getDate().toString(), 'fa')} ${persianMonths[gregorianDate.getMonth()]} ${convertDigits(gregorianDate.getFullYear().toString(), 'fa')}`
+                const englishFormatted = `${englishMonths[gregorianDate.getMonth()]} ${gregorianDate.getDate()}, ${gregorianDate.getFullYear()}`
+
+                return `${persianFormatted} - ${englishFormatted}`
+
+            } catch (error) {
+                console.error('Conversion error:', error)
+                return 'خطا در تبدیل تاریخ. لطفاً فرمت را بررسی کنید.'
             }
-
-            const year = parseInt(parts[0])
-            const month = parseInt(parts[1])
-            const day = parseInt(parts[2])
-
-            // استفاده از PersianDate
-            const persianDate = new PersianDate([year, month - 1, day]) // ماه در PersianDate از 0 شروع می‌شود
-            const gregorianDate = persianDate.toCalendar('gregorian')
-
-            // فرمت‌دهی به فارسی
-            const persianMonths = [
-                'ژانویه', 'فوریه', 'مارس', 'آوریل', 'مه', 'ژوئن',
-                'ژوئیه', 'اوت', 'سپتامبر', 'اکتبر', 'نوامبر', 'دسامبر'
-            ]
-
-            const englishMonths = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ]
-
-            const persianFormatted = `${convertDigits(gregorianDate.date().toString(), 'fa')} ${persianMonths[gregorianDate.month()]} ${convertDigits(gregorianDate.year().toString(), 'fa')}`
-            const englishFormatted = `${englishMonths[gregorianDate.month()]} ${gregorianDate.date()}, ${gregorianDate.year()}`
-
-            return `${persianFormatted} - ${englishFormatted}`
-
-        } catch (error) {
-            console.error('Conversion error:', error)
-            return 'خطا در تبدیل تاریخ. لطفاً فرمت را بررسی کنید.'
         }
-    }
 
-    const convertGregorianToJalali = (gregorianDate) => {
-        try {
-            const cleanedDate = gregorianDate.replace(/[/]/g, '-')
-            const dateObj = new Date(cleanedDate)
+        const convertGregorianToJalali = (gregorianDate) => {
+            try {
+                const cleanedDate = gregorianDate.replace(/[/]/g, '-')
+                const dateObj = new Date(cleanedDate)
 
-            if (isNaN(dateObj.getTime())) {
-                throw new Error('فرمت تاریخ نامعتبر')
+                if (isNaN(dateObj.getTime())) {
+                    throw new Error('فرمت تاریخ نامعتبر')
+                }
+
+                // استفاده از PersianDate
+                const persianDate = new PersianDate(dateObj)
+
+                const monthNames = [
+                    'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+                    'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+                ]
+
+                const jalaliMonthName = monthNames[persianDate.month()]
+                const formattedDate = `${convertDigits(persianDate.date().toString(), 'fa')} ${jalaliMonthName} ${convertDigits(persianDate.year().toString(), 'fa')}`
+                const numericDate = `${convertDigits(persianDate.year().toString(), 'fa')}/${convertDigits((persianDate.month() + 1).toString().padStart(2, '0'), 'fa')}/${convertDigits(persianDate.date().toString().padStart(2, '0'), 'fa')}`
+
+                return `${formattedDate} - ${numericDate}`
+
+            } catch (error) {
+                console.error('Conversion error:', error)
+                return 'خطا در تبدیل تاریخ. لطفاً فرمت را بررسی کنید.'
             }
-
-            // استفاده از PersianDate
-            const persianDate = new PersianDate(dateObj)
-
-            const monthNames = [
-                'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
-                'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
-            ]
-
-            const jalaliMonthName = monthNames[persianDate.month()]
-            const formattedDate = `${convertDigits(persianDate.date().toString(), 'fa')} ${jalaliMonthName} ${convertDigits(persianDate.year().toString(), 'fa')}`
-            const numericDate = `${convertDigits(persianDate.year().toString(), 'fa')}/${convertDigits((persianDate.month() + 1).toString().padStart(2, '0'), 'fa')}/${convertDigits(persianDate.date().toString().padStart(2, '0'), 'fa')}`
-
-            return `${formattedDate} - ${numericDate}`
-
-        } catch (error) {
-            console.error('Conversion error:', error)
-            return 'خطا در تبدیل تاریخ. لطفاً فرمت را بررسی کنید.'
         }
-    }
 
     const convertDate = () => {
         if (!convertDateInput.value.trim()) {
@@ -483,7 +488,6 @@ export const useCalendar = () => {
         }
     }
 
-    // توابع دیگر بدون تغییر...
     const setTodayDate = () => {
         convertDateInput.value = getTodayDate(convertDirection.value)
         convertDate()
