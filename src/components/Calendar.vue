@@ -186,7 +186,7 @@
 
 
 
-    <!-- مودال برای تبدیل تاریخ -->
+    <!-- مودال جدید برای تبدیل تاریخ -->
     <div v-if="showConvertModal" class="modal-overlay" @click="closeConvertModal">
       <div class="modal convert-modal" @click.stop>
         <div class="modal-header">
@@ -195,6 +195,12 @@
         </div>
 
         <div class="modal-body">
+          <!-- نمایش تاریخ امروز -->
+          <div class="today-info">
+            <span class="today-icon">📅</span>
+            <span class="today-text">امروز: {{ getTodayDisplay() }}</span>
+          </div>
+
           <!-- انتخاب جهت تبدیل -->
           <div class="conversion-direction">
             <label class="direction-label">
@@ -221,28 +227,38 @@
           <div class="input-group">
             <label class="input-label">
               {{ convertDirection === 'jalaliToGregorian' ? 'تاریخ شمسی' : 'تاریخ میلادی' }}
+              <span class="required-star">*</span>
             </label>
             <input
                 v-model="convertDateInput"
                 :placeholder="getInputPlaceholder"
                 class="date-input"
                 @keyup.enter="convertDate"
+                @focus="onInputFocus"
             />
-            <small class="input-hint">
-              {{ convertDirection === 'jalaliToGregorian'
-                ? 'فرمت: سال-ماه-روز (۱۴۰۳-۰۱-۱۵)'
-                : 'فرمت: سال-ماه-روز (۲۰۲۴-۰۴-۰۵)' }}
-            </small>
+            <div class="input-actions">
+              <small class="input-hint">
+                {{ convertDirection === 'jalaliToGregorian'
+                  ? 'فرمت: سال-ماه-روز (۱۴۰۳-۰۱-۱۵)'
+                  : 'فرمت: سال-ماه-روز (۲۰۲۴-۰۴-۰۵)' }}
+              </small>
+              <button @click="setTodayDate" class="today-btn">
+                امروز
+              </button>
+            </div>
           </div>
 
           <!-- دکمه تبدیل -->
           <button @click="convertDate" class="convert-btn">
-            تبدیل تاریخ
+            {{ getConvertButtonText }}
           </button>
 
           <!-- نتیجه تبدیل -->
           <div v-if="convertedDate" class="result-section">
-            <h4 class="result-title">نتیجه تبدیل:</h4>
+            <h4 class="result-title">
+              <span class="result-icon">✅</span>
+              نتیجه تبدیل:
+            </h4>
             <div class="converted-date">
               {{ convertedDate }}
             </div>
@@ -250,8 +266,10 @@
 
           <!-- راهنما -->
           <div class="help-section">
-            <h4 class="help-title">راهنما:</h4>
+            <h4 class="help-title">💡 راهنما:</h4>
             <ul class="help-list">
+              <li>• تاریخ امروز به طور خودکار وارد شده است</li>
+              <li>• برای استفاده از تاریخ امروز دکمه «امروز» را بزنید</li>
               <li v-if="convertDirection === 'jalaliToGregorian'">
                 • تاریخ شمسی را به فرمت <strong>سال-ماه-روز</strong> وارد کنید
               </li>
